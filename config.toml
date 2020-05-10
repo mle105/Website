@@ -20,12 +20,9 @@ theme = "hugo-sustain"
   custom_js  = []
 
 [params.social]
-  Github        = "username"
+  Github        = "mle105"
   Email         = "mle9910@gmail.com"
   Twitter       = "m4i_le"
-  LinkedIn      = "username"
-  Stackoverflow = "username"
-  Medium        = "username"
   Instagram     = "m4i.le"
 
 ## Main Menu
