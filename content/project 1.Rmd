@@ -1,0 +1,134 @@
+---
+title: "Project 1"
+author: "Mai Le"
+date: "3/3/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F, R.options=list(max.print=100))
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+###Data sets
+library(tidyverse)
+USArrests<-read.csv("USArrests.csv")
+StatesEdu<-read.csv("StatesEdu.csv")
+glimpse(USArrests)
+glimpse(StatesEdu)
+```
+My first dataset StatesEdu contains related statistics on the education in US States and Washington DC. It has 5 variables including State, Murder (murder arrests per 100000), Assault (assault arrests per 100000), UrbanPop (percent urban population), and Rape (rape arrests per 100000). My second dataset USArrests contains information on violent crime rate in different States. It has 8 variables including State, region (of the US), pop (population in 1000s), SATV (average score of graduating high school students in state on the verbal component of Scholastic Aptidtude Test), SATM (average score of graduating high school student in the state on the math component of Scholastic Aptitude Test), percent (of graduating high school students in the state who took the SAT exam), dollars (state spending on public education in 1000s dollars per student), and pay (average teacher's salary in the state in 1000s dollars). 
+
+I found these two from the vincentarelbundock website of archive of R datasets. They were interesting to me because there have been much talk about education relating to the safety of our communities in the political debate that's currently happening. I think there will be an inverse correlation between the dollars in the StatesEdu and at least one of the arrests variable in the USArrests, if not all of them.
+
+```{R}
+###Joining
+#observation CO in USArrests contains a space whereas CO in StatesEdu doesn't
+#to get rid of the space
+USArrests<-USArrests%>%mutate(State=str_trim(State,"right")) 
+bothdata<-inner_join(USArrests, StatesEdu, by="State")
+bothdata
+anti_join(USArrests,StatesEdu)
+anti_join(StatesEdu,USArrests)
+```
+I used inner_join to combine my two dataset together by keeping only the rows that have a match on the ID variable of State. I used this one because I wanted to drop any row in either datset that doesn't have a match, which was the observation of DC in the StatesEdu dateset. I found this by using anti_join to give me the rows in one dataset that have no match in the other dataset and vice versa. One resulting potential problem its information won't be incoporated to help find any possible correlation between different variables later on.   
+
+```{r}
+###Wrangling
+summary(bothdata$pay)
+
+bothdata<-bothdata%>%group_by(pay)%>%
+  mutate(pay_cat = case_when(pay>36~"high",29<=pay &
+  pay<=36 ~"med",pay<29~"low"))
+
+bothdata<-bothdata%>% mutate(percent_cat=factor(ntile(percent,2),
+  levels=1:2,labels=c("lower","higher")))
+
+bothdata%>%filter(region=="SA")%>%select(State,pay_cat,Assault)%>%
+  arrange(desc(Assault))
+```
+
+```{r}
+#finding summary statistics for each numeric variable overall
+bothdata%>%mutate(sdSATM=sd(SATM,na.rm=T))
+
+#finding summary statistics for numeric variable after grouping
+bothdata%>%group_by(percent_cat)%>%summarize(max(pop))
+bothdata%>%group_by(percent_cat)%>%summarize(median(dollars))
+bothdata%>%group_by(percent_cat)%>%summarize_at(c("UrbanPop","pop","pay"), var)
+
+bothdata%>%group_by(region)%>%summarize(mean(pay))
+bothdata%>% group_by(region)%>%summarize(cor(dollars, SATM))
+bothdata%>%group_by(region)%>%summarize_at(c("Assault","Murder","Rape"), IQR)
+
+bothdata%>%group_by(pay_cat)%>%summarize(cor(UrbanPop,percent))
+
+#one statistic from grouping two categorical variables 
+bothdata%>%group_by(region,pay_cat)%>%summarize_at("SATV",
+  min)%>%pivot_wider(names_from=pay_cat,values_from=SATV)
+```
+The standard deviations for average score of graduating high school student in the state on the math copmonent of Scholastic Aptitude Test overall range from 2.828427 to 52.648837. The maximum population is higher in the lower category of percent of graduating high school students in the state who took the SAT while its median percent state spending on public education is lower. The variance of poulation and average teacher's salary in the state is higher for lower category of percent of graduating high school students while the opposite is seen for urban population. The mean average teacher's salary ranges not too far apart between the different US regions. 5 regions have negative correlation between dollars (state spending on public education) and average score of graduating high school students in the state on the math component while 4 other regions have positive correlation. The interquartile ranges of murder and rape arrests are much lower than that of the assault arrest. Average teacher's salary that falls within the high category is the  only one with a positive correlation between urban population and percent of graduating high school students in the state who took the SAT. Meanwhile, the low and medium categories both have negative correlation. After grouping  the data by US region and tidying it, the medium category of the average of teacher's salary has the highest average score of graduating high school students in the state on the verbal component while the low category had the lowest value. The high category seems to have the smallest range of scores while the low category has the biggest.
+
+```{r}
+###Visualizing (correlation heatmap of numeric variables)
+bothdata%>%select_if(is.numeric)%>%cor%>%as.data.frame%>%
+  rownames_to_column%>%pivot_longer(-1)%>%ggplot(aes(rowname,name,fill=value))+
+  geom_tile()+geom_text(aes(label=round(value,2)))+xlab("")+ylab("")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))+
+  scale_fill_gradient2(low="red",high="blue")
+```
+The average scores of graduating high school students in the state on the math and verbal component have negative correlation with all the other variables, except when it's with each other. Urban population has a postive correlation with all the other, except when it's with the two variables mentioned earlier. Population also has a positive correaltion with all the other variables. Besides the two SAT scores the strong positive correlation is between average teacher's salary and state's spending on public education (dollars). Meanwhile, the strongest negative correlations were between the percent of graduating high school students who took the SAT and the average score of graduating high school students in the state on the math and verbal component.
+
+```{r}
+###Visualizing (ggplot 1)
+ggplot(bothdata, aes(x=region, y=Murder, fill=percent_cat))+
+  scale_fill_hue(l=40)+geom_bar(stat="summary", fun.y="mean")+
+  ggtitle("Bar Chart of Murder Arrests vs Percent vs US Region") +
+  scale_y_continuous(breaks=seq(0,35,5))+xlab("Regions of US")+ 
+  ylab("Murder Arrests per 1000,000") +theme(axis.text.x=element_text(angle=90,hjust=1))
+```
+From the bar chart, there seems to be higher murder arrests per 1000,000 if the percent of graduating high school students in the state who took the SAT exam falls under the lower category that compared to the higher one in the same US region. One exception is that of NE region where the higher category of percent of graduating high school students in the state who took the SAT exam seems to have a slightly higher murder arrests than that of the lower percent category. The two regions with the highest murder arrests are WSC and SA while the lowest were NE and WNC.
+
+```{r}
+###Visualizing (ggplot 2)
+ggplot(bothdata, aes(Assault, Rape, color=dollars))+geom_point()+
+  ggtitle("Scatterplot of Assault Arrest, Rape Arrests, 
+  and State's Spending on Public Education")+
+  scale_color_gradient(low="yellow", high="red")+
+  xlab("Assault Arrests per 100,000")+ylab("Rape Arrests per 100,000")+theme_dark()
+```
+From the plot above, there seems to be a general positive correlation between the Assault Arrests and the Rape Arrests per 100,000. If a regression line was generated, we can see as Assault Arrests increases, the Rape Arrests seem to increase as well with a few outliers. On the other hand, there doesn't seem to be any prominent relationship between dollar vairable (state spending on public education in 1000s dollars per student) with either of the two variables. This can be concluded from the color gradient being distributed everywhere on the plot, with no visible trend either to the x-axis or the y-axis. 
+
+```{r}
+###Dimentionality Reduction
+library(ggplot2)
+library(cluster)
+
+#choosing number of clusters
+variables<-bothdata%>%select(Rape,pay,percent,pop)
+sil_width<-vector()
+for(i in 2:10){
+  pam_fit <- pam(variables, k=i)
+  sil_width[i] <- pam_fit$silinfo$avg.width
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+
+#interpreting Average Silhouette Width
+pam1<- variables%>%pam(2)
+plot(pam1, which=2) 
+library(GGally)
+
+#visualize pairwise combinations
+pamclust<-variables%>%ungroup%>%mutate(cluster=as.factor(pam1$clustering))
+pamclust%>% ggpairs(columns = c(1,2,3,4), aes(color=cluster))
+```
+I created a smaller dataset of just Rape, pay, percent, and pop variables to analyze since I think they might have interesting results to look at. Then, I chose a cluster of 2 by running mean silhouette width, and the highest peak in the plot was 2 for k. The average silhouette width was 0.71, indicating that a strong structure has been found. I then created a visualization of all the possible pair of combination to compare between those 4 variables. All pairs have weak positive correlation except percent (of high school stdents in the state who took the SAT exam) with Rape Arrests, which had a weak very negative correlation. Percent (of high school stdents in the state who took the SAT exam) and pay (average teacher's salary) have a higher positive correlation than the other combination pairs. 
+
+
+```{R}

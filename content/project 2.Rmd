@@ -1,0 +1,252 @@
+---
+title: 'Project 2: Modeling, Testing, and Predicting'
+author: "Mai Le (ML45477)"
+date: "`r Sys.Date()`"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+- **0. (5 pts)** Introduce your dataset and each of your variables (or just your main variables if you have lots) in a paragraph. What are they measuring? How many observations?
+
+```{R}
+social<-read.csv("socsupport.csv")
+social<-social%>%dplyr::select(-firstyr,-enrolment,-BDI,-emotionalsat,-X,-tangiblesat,-affectsat,-psisat,-esupport,-psupport)
+head(social)
+```
+
+### My dataset focuses on social and other kinds of support. 'gender' is a binary categorical variable indicating the biological sex of the participant, 'age' is a categorical variable with 5 levels measuring how old in years the participant is, 'employment' is a categorical variable with 5 levels indicating the participant's working status, 'marital' is a categorical variable with 3 levels indicating the participant's marital status, 'livewith' is a categorical variable with 6 levels indicating the participant's living situation. 'emotional', 'tangible', and 'affect' are all numeric variables on the availability of their respective kinds of support. 'psi' is a numeric variable on the availability of positive social interaction and 'supsources' is the numeric variable on the extent of social support sources. "country" is a binomial categorial variable stating whether the participant is from Australia or another country. All variable 'firstyr', 'enrolment', 'emotionalsat', 'tangiblesat', 'affectsat', 'psisat', 'esupport', 'psupport', and 'BDI' because I wasn't as interested in their possible relationship.
+
+- **1. (15 pts)** Perform a MANOVA testing whether any of your numeric variables (or a subset of them, if including them all doesn't make sense) show a mean difference across levels of one of your categorical variables (3). If they do, perform univariate ANOVAs to find response(s) showing a mean difference across groups (3), and perform post-hoc t tests to find which groups differ (3). Discuss the number of tests you have performed, calculate the probability of at least one type I error (if unadjusted), and adjust the significance level accordingly (bonferroni correction) before discussing significant differences (3). Briefly discuss assumptions and whether or not they are likely to have been met (2).
+
+```{R}
+man1<-manova(cbind(emotional, tangible, affect,psi,supsources)~livewith,data=social)
+summary(man1) ### 1 manova
+summary.aov(man1) ### 2 anovas
+pairwise.t.test(social$tangible, social$livewith, p.adj = "none") ###15
+pairwise.t.test(social$affect, social$livewith, p.adj = "none") ###15
+0.05/(1+2+15+15)
+```
+### A one-qay MANOVA was conducted to detemine the effect of participant's living situation (alone, friends, other, parents, partner, residences) on five dependent variables (tangible, affect, emotional, psi, supsources). Significant differences were found among the living situations with at least one of the dependent variables, Pillai trace = 0.49207 pseudo F(25, 430) = 1.8775 p < 0.05. Univariate ANOVAs for each dependent variable were conducted as follow-up tests to the MANOVA, using the Bonferroni method for controlling Type I error rates for multiple comparisons. The univariate ANOVAs for affect and tangible were also significant F(5,86) = 3.8582, p < .05 F(5, 86) = 5.3107 p =< .05, respectively. Post hoc analysis was performed conducting pairwise comparisons to determine which living situation differed in affect and tangible. Partner and alone, parents and residences, partner and residences, each pair was found to differ significantly from each other in terms of affect and tangible after adjusting for multiple comparitsons (0.05/(1+2+15+15)) = 0.001515152. The first assumption of random smaples with independent observations was most likely met since this data was distributed via survey. However, there's a possibility of bias in the data since this dataset was obtained mostly in Australia, so it's not as represented as we would have liked. No way for us to know just by looking at the dataset that the second and third assumption of linear relationships among dependent variables and dependent variables shouldn't be too correlated are met unless we do further testing. For the last 3 assumptions we assume they've been met in order to perform MANOVA. They are multivariate normality of dependent, homogeneity of within group covariance matrices, and no extreme univariate or multivariate outliers. 
+
+- **2. (10 pts)** Perform some kind of randomization test on your data (that makes sense). This can be anything you want! State null and alternative hypotheses, perform the test, and interpret the results (7). Create a plot visualizing the null distribution and the test statistic (3).
+
+```{R}
+obs_F<-5.3107
+Fs<-replicate(5000,{
+  new<-social%>%mutate(affect=sample(affect)) 
+  SSW<- new%>%group_by(livewith)%>%summarize(SSW=sum((affect-mean(affect))^2))%>% summarize(sum(SSW))%>%pull
+  SSB<- new%>%mutate(mean=mean(affect))%>%group_by(livewith)%>%mutate(groupmean=mean(affect))%>%summarize(SSB=sum((mean-groupmean)^2))%>%summarize(sum(SSB))%>%pull
+  (SSB/5)/(SSW/86) 
+})
+hist(Fs, prob=T); abline(v = obs_F, col="red",add=T)
+mean(Fs>obs_F)
+```
+### The null hypothesis is the true mean of the response variable, affect, is the same for all 6 groups of living siatuations (livewith). The alternative hypothesis is that at least one of these means differs from the others. The p value is smaller than 0.05 and none of our 5000 F statistics generated under the null hypothesis were bigger than our actial F statistic of 5.3107. This means we can reject the null hypothesis and conclude that the groups differ. 
+
+- **3. (35 pts)** Build a linear regression model predicting one of your response variables from at least 2 other variables, including their interaction. Mean-center any numeric variables involved in the interaction.
+
+    - Interpret the coefficient estimates (do not discuss significance) (10)
+    - Plot the regression using `ggplot()`. If your interaction is numeric by numeric, refer to code near the end of WS15 to make the plot. (8)
+    - Check assumptions of linearity, normality, and homoskedasticity either graphically or using a hypothesis test (4)
+    - Regardless, recompute regression results with robust standard errors via `coeftest(..., vcov=vcovHC(...))`. Discuss significance of results, including any changes from before/after robust SEs if applicable. (8)
+    - What proportion of the variation in the outcome does your model explain? (4)
+
+```{R}
+library(sandwich)
+library(lmtest)
+fit3<-lm(emotional ~ affect * psi, data=social)
+summary(fit3)
+
+#mean center numeric variable
+social$psi_c <- social$psi - mean(social$psi)
+social$affect_c<- social$affect - mean(social$affect)
+fitcenter<-lm(emotional ~ affect_c*psi_c, data=social)
+summary(fitcenter)
+
+#plot
+new1<-social
+new1$affect_c<-mean(social$affect_c)
+new1$mean<-predict(fitcenter,new1)
+new1$affect_c<-mean(social$affect_c)+sd(social$affect_c)
+new1$plus.sd<-predict(fitcenter,new1)
+new1$affect_c<-mean(social$affect_c)-sd(social$affect_c)
+new1$minus.sd<-predict(fitcenter,new1)
+newint<-new1%>%select(emotional,psi_c,mean,plus.sd,minus.sd)%>%gather(affect,value,-emotional,-psi_c)
+
+mycols<-c("#619CFF","#F8766D","#00BA38")
+names(mycols)<-c("-1 sd","mean","+1 sd")
+mycols=as.factor(mycols)
+
+ggplot(social,aes(psi_c,emotional),group=mycols)+geom_point()+geom_line(data=new1,aes(y=mean,color="mean"))+geom_line(data=new1,aes(y=plus.sd,color="+1 sd"))+geom_line(data=new1,aes(y=minus.sd,color="-1 sd"))+scale_color_manual(values=mycols)+labs(color="affect (cont)")+theme(legend.position=c(.9,.2))
+
+#assumptions
+resids<-fit3$residuals
+fitvals<-fit3$fitted.values
+ggplot()+geom_point(aes(fitvals,resids))+geom_hline(yintercept=0, col="red")
+ggplot()+geom_histogram(aes(resids),bins=20)
+ggplot()+geom_qq(aes(sample=resids))+geom_qq_line(aes(sample=resids), color='red')
+
+#robust SE
+coeftest(fitcenter, vcov = vcovHC(fitcenter))
+```
+### As seen with all three p values, interaction is significant after mean centering all numeric variables. The coefficient psi_c shows that for every one unit increase in the centered availability of positive social interaction, the availability of emotional support is expected to increase by 0.51345. The coefficient of affect_c shows that for every one unit increase in the centered availability affectionate support sources, the avaliability of emotional support is expected to increase by 0.46140. For those with average centered availability of positive social interaction, the centered availability of affectionate support sources has a predicted availability of emotional support of 0.07258 less than the nonaverage. After recomputing regression results with robust standard errors, the results continue to stay significiant. All the stadard errors increased from before robust SEs. Also all t values decreased except that of affect_c:psi_c. The proportion of variation in the response variable explained by the overall model is  0.5512.
+
+- **4. (5 pts)** Rerun same regression model (with interaction), but this time compute bootstrapped standard errors. Discuss any changes you observe in SEs and p-values using these SEs compared to the original SEs and the robust SEs)
+
+```{R}
+boot_social<- sample_frac(social, replace=T)
+
+samp_distn<-replicate(5000, {
+  boot_social <- sample_frac(social, replace=T) 
+  fitcenter<-lm(emotional ~ affect_c * psi_c, data=boot_social)
+  coef(fitcenter) 
+})
+samp_distn %>% t %>% as.data.frame %>% summarize_all(sd)
+samp_distn %>% t %>% as.data.frame %>% gather %>% group_by(key) %>%summarize(lower=quantile(value,.025), upper=quantile(value,.975))
+```
+### The bootstrapped SEs are all higher than those of the original but lower than those of the robust SEs.
+
+- **5. (40 pts)** Perform a logistic regression predicting a binary categorical variable (if you don't have one, make/get one) from at least two explanatory variables (interaction not necessary). 
+
+    - Interpret coefficient estimates in context (10)
+    - Report a confusion matrix for your logistic regression (2)
+    - Compute and discuss the Accuracy, Sensitivity (TPR), Specificity (TNR), and Recall (PPV) of your model (5)
+    - Using ggplot, plot density of log-odds (logit) by your binary outcome variable (3)
+    - Generate an ROC curve (plot) and calculate AUC (either manually or with a package); interpret (10)
+    - Perform 10-fold (or repeated random sub-sampling) CV and report average out-of-sample Accuracy, Sensitivity, and Recall (10)
+    
+```{R}
+library(plotROC)
+library(glmnet)
+social<-social%>%dplyr::select(-psi_c,-affect_c)
+social5 <- social %>% mutate(y = ifelse(gender == "female", 1, 0))
+fit5<-glm(y~age + psi, family="binomial", data=social5)
+coeftest(fit5)
+
+exp(0.256087)
+exp(0.467230)
+exp(-1.766909)
+exp( 0.024245)
+exp(0.043900)
+
+#confusion matrix
+prob<-predict(fit5,type="response") 
+table(predict=as.numeric(prob>.5),truth=social5$y)%>%addmargins
+69/71 #tpr
+4/24 #tnr
+69/89 #ppv
+
+#plot
+social5$logit<-predict(fit5,type="link") 
+social5%>%ggplot()+geom_density(aes(logit,color=gender,fill=gender), alpha=.4)+
+  theme(legend.position=c(.85,.85))+
+  geom_vline(xintercept=0)+xlab("logit(log-odds)")+
+  geom_rug(aes(logit,color=gender))+
+  geom_text(x=-5,y=.07,label="TN = 4")+
+  geom_text(x=-1.75,y=.008,label="FN = 2")+
+  geom_text(x=1,y=.006,label="FP = 20")+
+  geom_text(x=5,y=.04,label="TP = 69")
+
+#roc curve and auc
+pred <- ifelse(prob > 0.5, 1, 0)
+ROCplot <- ggplot(social5) + geom_roc(aes(d = y, m = prob), n.cuts = 0) +geom_segment(aes(x = 0, xend = 1, y = 0, yend = 1), lty = 2)
+ROCplot
+calc_auc(ROCplot)
+
+#10 fold
+class_diag <- function(probs,truth){
+tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+acc=sum(diag(tab))/sum(tab)
+sens=tab[2,2]/colSums(tab)[2]
+spec=tab[1,1]/colSums(tab)[1]
+ppv=tab[2,2]/rowSums(tab)[2]
+if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+ord<-order(probs, decreasing=TRUE)
+probs <- probs[ord]; truth <- truth[ord]
+TPR=cumsum(truth)/max(1,sum(truth))
+FPR=cumsum(!truth)/max(1,sum(!truth))
+dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+n <- length(TPR)
+auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+data.frame(acc,sens,spec,ppv,auc)
+}
+set.seed(1234)
+k=10
+data<-social5[sample(nrow(social5)),]
+folds<-cut(seq(1:nrow(social5)),breaks=k,labels=F)
+diags<-NULL
+for(i in 1:k){
+  train<-data[folds!=i,]
+  test<-data[folds==i,]
+  truth<-test$y
+  fit5<-glm(y~age + psi, data=train, family="binomial")
+  probs<-predict(fit5,newdata = test,type="response")
+  diags<-rbind(diags,class_diag(probs,truth))}
+
+summarize_all(diags,mean) 
+```
+### While controlling for psi, no age group is signficantly different when comparing to reference age group of 18-20. Odds of female for age group 21-24 is 1.291865 times odds for 18-20. Odds of female for age group 25-30 is 1.595568 times odds for 18-20. Odds of female for age group 31-40 is 0.1708603 times odss for 18-20. Odds of female for age group 40+ is 1.024541 times odds for 18-20. Controlling for age, for every one unit increase in psi, the availability of positive social interaction, odds of being a female change by a factor of 1.044878. The sensitivity or true positive rate is 0.971831, the specificity or true negative rate is 0.1666667, and the precision or the proportion classifed female who actually are is 0.7752809. As seen on density plot, we have very high density of false positive, where we predicted female but they're actually male, as seen with the red region when logit>0. In addition, we have much lower density of predicting male correctly, as evident with the blue region when logit<0. AUC is calculated to be 0.6012324 thus the probability that a randomly selected person is a female has a higher predicted probability than a randomly selected person who isn't a female. After performing a 10 fold CV, the auc is now 0.4518849, sens is 0.9690476, acc is 0.7588889, ppv is 0.7636111, and spec is 0.1. Since the auc decreases from 0.6012324 to 0.4518849, we can conclude that the model did overfit a bit.
+
+- **6. (10 pts)** Choose one variable you want to predict (can be one you used from before; either binary or continuous) and run a LASSO regression inputting all the rest of your variables as predictors. Choose lambda to give the simplest model whose accuracy is near that of the best (i.e., `lambda.1se`). Discuss which variables are retained. Perform 10-fold CV using this model: if response in binary, compare model's out-of-sample accuracy to that of your logistic regression in part 5; if response is numeric, compare the residual standard error (at the bottom of the summary output, aka RMSE): lower is better fit!
+
+```{R}
+social2<-na.omit(social)
+y<-as.matrix(social2$country)
+x<-model.matrix(country~.,data=social2)[,-1] 
+x<-scale(x) 
+cv <- cv.glmnet(x,y, family="binomial")
+lasso<-glmnet(x,y,family="binomial",lambda=cv$lambda.1se)
+coef(lasso)
+
+#10 fold
+set.seed(1234)
+k=10
+data <- social2 %>% sample_frac 
+folds <- ntile(1:nrow(data),n=10) 
+diags<-NULL
+for(i in 1:k){
+  train <- data[folds!=i,] 
+  test <- data[folds==i,] 
+  truth <- test$country 
+  fit <- glm(country~psi,data=train, family="binomial")
+  probs <- predict(fit, newdata=test, type="response")
+  diags<-rbind(diags,class_diag(probs,truth))}
+diags%>%summarize_all(mean)
+```
+### Variable psi, the availability of positive social interaction, is the only one retained. Looks like it's the most predictive variable. AUC comes out to be 0.3705357, which decreased more from that of the 10 fold CV that was done in part 5. This means that model overfitted. ACC comes out to be 0.8933333, while sens and ppv did not have a value, and spec comes out at 1.
+
+```{R, echo=F}
+## DO NOT DELETE THIS BLOCK!
+sessionInfo()
+Sys.time()
+Sys.info()
+```
+
+
+
