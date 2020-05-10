@@ -196,6 +196,7 @@ n <- length(TPR)
 auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
 data.frame(acc,sens,spec,ppv,auc)
 }
+
 set.seed(1234)
 k=10
 data<-social5[sample(nrow(social5)),]
