@@ -3,13 +3,13 @@ title: 'Project 2: Modeling, Testing, and Predicting'
 author: "Mai Le (ML45477)"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    toc: yes
   html_document:
     toc: yes
     toc_float:
       collapsed: no
       smooth_scroll: yes
+  pdf_document:
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -180,22 +180,22 @@ calc_auc(ROCplot)
 
 #10 fold
 class_diag <- function(probs,truth){
-tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
-acc=sum(diag(tab))/sum(tab)
-sens=tab[2,2]/colSums(tab)[2]
-spec=tab[1,1]/colSums(tab)[1]
-ppv=tab[2,2]/rowSums(tab)[2]
-if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
-ord<-order(probs, decreasing=TRUE)
-probs <- probs[ord]; truth <- truth[ord]
-TPR=cumsum(truth)/max(1,sum(truth))
-FPR=cumsum(!truth)/max(1,sum(!truth))
-dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
-TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
-n <- length(TPR)
-auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
-data.frame(acc,sens,spec,ppv,auc)
-}
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE)
+  truth<-as.numeric(truth)-1
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  TPR=cumsum(truth)/max(1,sum(truth))
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+  data.frame(acc,sens,spec,ppv,auc)}
 
 set.seed(1234)
 k=10

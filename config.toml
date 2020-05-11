@@ -30,12 +30,12 @@ theme = "hugo-sustain"
   name = "blog"
   weight = 100
   identifier = "blog"
-  url = "/2020-05-10-first-post-and-some-python.Rmarkdown/"
+  url = "/blog/"
 [[menu.main]]
   name = "projects"
   identifier = "projects"
   weight = 200
-  url = "/Projects.Rmd/"
+  url = "/Projects/"
 [[menu.main]]
   name = "resume"
   identifier = "resume"
