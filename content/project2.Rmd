@@ -179,23 +179,32 @@ ROCplot
 calc_auc(ROCplot)
 
 #10 fold
-class_diag <- function(probs,truth){
+class_diag<-function(probs,truth){
+  
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
   tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
-  acc=sum(diag(tab))/sum(tab)
-  sens=tab[2,2]/colSums(tab)[2]
-  spec=tab[1,1]/colSums(tab)[1]
-  ppv=tab[2,2]/rowSums(tab)[2]
-  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE)
-  truth<-as.numeric(truth)-1
+  prediction<-ifelse(probs>.5,1,0)
+  acc=mean(truth==prediction)
+  sens=mean(prediction[truth==1]==1)
+  spec=mean(prediction[truth==0]==0)
+  ppv=mean(truth[prediction==1]==1)
+  
+  #CALCULATE EXACT AUC
   ord<-order(probs, decreasing=TRUE)
   probs <- probs[ord]; truth <- truth[ord]
-  TPR=cumsum(truth)/max(1,sum(truth))
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
   FPR=cumsum(!truth)/max(1,sum(!truth))
+  
   dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
   TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
   n <- length(TPR)
   auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
-  data.frame(acc,sens,spec,ppv,auc)}
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
 
 set.seed(1234)
 k=10
