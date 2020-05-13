@@ -1,14 +1,54 @@
 ---
-title: First Post and Some Python!
-author: Mai Le
+title: "First Post and Some Python!"
+author: "Mai Le"
 date: '2020-05-10'
-slug: first-post-and-some-python
-categories: []
-tags: []
 description: ''
+slug: first-post-and-some-python
+tags: []
+categories: []
 ---
 
 Hey everyone! Hope yall are doing well!
 
-Here's a picture of a painting I managed to complete during this COVID-19 quarantine. I'm not an art person at all, so I'm really proud of myself! ![](/blog/2020-05-10-first-post-and-some-python_files/drawing.jpg)
+Here's a picture of a painting I managed to complete during this COVID-19 quarantine. I'm not an art person at all, so I'm really proud of myself!
+![](/blog/2020-05-10-first-post-and-some-python_files/drawing.jpg)
 
+Reticulate lets R and Python play together, so let's pull up the package in R code chunk. Then assign "Never thought" and save it as one.
+
+
+```r
+library(reticulate)
+```
+
+```
+## Warning: package 'reticulate' was built under R version 3.6.3
+```
+
+```r
+one<-"Never thought"
+```
+
+Next, in python code chunk, assign "I would miss in-person classes" and save it as one. You can now look for what you saved in R and read them into python using print. See what comes out!
+
+
+```python
+one="I would miss in-person classes"
+print(r.one,one)
+```
+
+```
+## Never thought I would miss in-person classes
+```
+
+Or you can look for what you saved in python and read them into R using cat. It works the same!
+
+
+```r
+cat(c(one,py$one))
+```
+
+```
+## Never thought I would miss in-person classes
+```
+
+Now that you know the basics, you can use python and R together. The world is your oyster!

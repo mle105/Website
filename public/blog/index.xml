@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Blogs on Portfolio</title>
+    <link>/blog/</link>
+    <description>Recent content in Blogs on Portfolio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Sun, 10 May 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/blog/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>First Post and Some Python!</title>
+      <link>/blog/first-post-and-some-python/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/first-post-and-some-python/</guid>
+      <description>Hey everyone! Hope yall are doing well!
+Here&amp;rsquo;s a picture of a painting I managed to complete during this COVID-19 quarantine. I&amp;rsquo;m not an art person at all, so I&amp;rsquo;m really proud of myself! Reticulate lets R and Python play together, so let&amp;rsquo;s pull up the package in R code chunk. Then assign &amp;ldquo;Never thought&amp;rdquo; and save it as one.
+library(reticulate) ## Warning: package &#39;reticulate&#39; was built under R version 3.</description>
+    </item>
+    
+    <item>
+      <title>First Post and Some Python!</title>
+      <link>/blog/first-post-and-some-python/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/first-post-and-some-python/</guid>
+      <description>Hey everyone! Hope yall are doing well!
+Here&amp;rsquo;s a picture of a painting I managed to complete during this COVID-19 quarantine. I&amp;rsquo;m not an art person at all, so I&amp;rsquo;m really proud of myself! Reticulate lets R and Python play together, so let&amp;rsquo;s pull up the package in R code chunk. Then assign &amp;ldquo;Never thought&amp;rdquo; and save it as one.
+library(reticulate) ## Warning: package &#39;reticulate&#39; was built under R version 3.</description>
+    </item>
+    
+    <item>
+      <title>First Post and Some Python!</title>
+      <link>/blog/first-post-and-some-python/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/first-post-and-some-python/</guid>
+      <description>Hey everyone! Hope yall are doing well!
+Here&amp;rsquo;s a picture of a painting I managed to complete during this COVID-19 quarantine. I&amp;rsquo;m not an art person at all, so I&amp;rsquo;m really proud of myself! Reticulate lets R and Python play together, so let&amp;rsquo;s pull up the package in R code chunk. Then assign &amp;ldquo;Never thought&amp;rdquo; and save it as one.
+library(reticulate) ## Warning: package &#39;reticulate&#39; was built under R version 3.</description>
+    </item>
+    
+  </channel>
+</rss>

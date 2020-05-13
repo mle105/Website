@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Portfolio</title>
+    <link>/</link>
+    <description>Recent content on Portfolio</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Wed, 13 May 2020 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Project 2: Modeling, Testing, and Predicting</title>
+      <link>/project2/</link>
+      <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/project2/</guid>
+      <description>0. (5 pts) Introduce your dataset and each of your variables (or just your main variables if you have lots) in a paragraph. What are they measuring? How many observations?social&amp;lt;-read.csv(&amp;quot;socsupport.csv&amp;quot;)social&amp;lt;-social%&amp;gt;%dplyr::select(-firstyr,-enrolment,-BDI,-emotionalsat,-X,-tangiblesat,-affectsat,-psisat,-esupport,-psupport)head(social)## gender age country marital livewith employment emotionaltangible affect psi## 1 male 21-24 australia other partner employed part-time22 17 15 12## 2 female 21-24 australia single partner parental support21 12 10 9## 3 male 21-24 australia single residences employedpart-time 21 16 15 13## 4 male 18-20 australia single parents employed part-time19 20 11 13## 5 female 21-24 australia single friends employedpart-time 16 11 6 11## 6 female 21-24 australia single friends govt assistance20 16 12 12## supsources## 1 13## 2 10## 3 14## 4 15## 5 9## 6 13My dataset focuses on social and other kinds of support.</description>
+    </item>
+    
+    <item>
+      <title>First Post and Some Python!</title>
+      <link>/blog/first-post-and-some-python/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/first-post-and-some-python/</guid>
+      <description>Hey everyone! Hope yall are doing well!
+Here&amp;rsquo;s a picture of a painting I managed to complete during this COVID-19 quarantine. I&amp;rsquo;m not an art person at all, so I&amp;rsquo;m really proud of myself! Reticulate lets R and Python play together, so let&amp;rsquo;s pull up the package in R code chunk. Then assign &amp;ldquo;Never thought&amp;rdquo; and save it as one.
+library(reticulate) ## Warning: package &#39;reticulate&#39; was built under R version 3.</description>
+    </item>
+    
+    <item>
+      <title>First Post and Some Python!</title>
+      <link>/blog/first-post-and-some-python/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/first-post-and-some-python/</guid>
+      <description>Hey everyone! Hope yall are doing well!
+Here&amp;rsquo;s a picture of a painting I managed to complete during this COVID-19 quarantine. I&amp;rsquo;m not an art person at all, so I&amp;rsquo;m really proud of myself! Reticulate lets R and Python play together, so let&amp;rsquo;s pull up the package in R code chunk. Then assign &amp;ldquo;Never thought&amp;rdquo; and save it as one.
+library(reticulate) ## Warning: package &#39;reticulate&#39; was built under R version 3.</description>
+    </item>
+    
+    <item>
+      <title>First Post and Some Python!</title>
+      <link>/blog/first-post-and-some-python/</link>
+      <pubDate>Sun, 10 May 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/blog/first-post-and-some-python/</guid>
+      <description>Hey everyone! Hope yall are doing well!
+Here&amp;rsquo;s a picture of a painting I managed to complete during this COVID-19 quarantine. I&amp;rsquo;m not an art person at all, so I&amp;rsquo;m really proud of myself! Reticulate lets R and Python play together, so let&amp;rsquo;s pull up the package in R code chunk. Then assign &amp;ldquo;Never thought&amp;rdquo; and save it as one.
+library(reticulate) ## Warning: package &#39;reticulate&#39; was built under R version 3.</description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Sun, 02 Oct 2016 22:55:05 -0400</pubDate>
+      
+      <guid>/projects/</guid>
+      <description>Projects Here are some projects I have recently completed:
+  Exploratory Data Analysis with Tidyverse Tools
+  Modeling, Testing, and Classification
+  </description>
+    </item>
+    
+    <item>
+      <title>Project 1</title>
+      <link>/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project1/</guid>
+      <description>###Data setslibrary(tidyverse)USArrests&amp;lt;-read.csv(&amp;quot;USArrests.csv&amp;quot;)StatesEdu&amp;lt;-read.csv(&amp;quot;StatesEdu.csv&amp;quot;)glimpse(USArrests)## Observations: 50## Variables: 5## $ State &amp;lt;fct&amp;gt; AL, AK, AZ, AR, CA, CO , CN, DE, FL, GA, HI, ID, IL, IN, I...## $ Murder &amp;lt;dbl&amp;gt; 13.2, 10.0, 8.1, 8.8, 9.0, 7.9, 3.3, 5.9, 15.4, 17.4, 5.3,...## $ Assault &amp;lt;int&amp;gt; 236, 263, 294, 190, 276, 204, 110, 238, 335, 211, 46, 120,...## $ UrbanPop &amp;lt;int&amp;gt; 58, 48, 80, 50, 91, 78, 77, 72, 80, 60, 83, 54, 83, 65, 57.</description>
+    </item>
+    
+  </channel>
+</rss>
